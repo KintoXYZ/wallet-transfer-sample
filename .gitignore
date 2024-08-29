@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+dev.kinto.xyz-key.pem
+dev.kinto.xyz.pem
