@@ -1,0 +1,23 @@
+html,
+body {
+  font-family: SpaceGrotesk, Arial, Helvetica, sans-serif;
+  color: var(--primary);
+  width: 100%;
+  position: relative;
+}
+
+body {
+  background: var(--white);
+}
+
+.quad-app.quad-modal{
+  background-color: white !important;
+}
+
+[role="dialog"] {
+  background: transparent !important;
+
+  @media only screen and (max-width: 400px) {
+    margin: 8px !important;
+  }
+}
