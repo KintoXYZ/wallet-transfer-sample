@@ -17,6 +17,7 @@ import {
   Select,
   MenuItem,
   TextField,
+  Alert,
 } from '@mui/material';
 import {KYCViewerService, KYCViewerInfo} from './KYCViewerService';
 import { getCountryFlagAndCode } from './utils/countryCodes';
@@ -55,6 +56,7 @@ const KintoConnect = () => {
   const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [transferAmount, setTransferAmount] = useState<string>('');
   const [destinationKYCInfo, setDestinationKYCInfo] = useState<KYCViewerInfo | null>(null);
+  const [destinationKYCError, setDestinationKYCError] = useState<string | null>(null);
   const kintoSDK = createKintoSDK('0x14A1EC9b43c270a61cDD89B6CbdD985935D897fE');
 
   async function kintoLogin() {
@@ -70,7 +72,11 @@ const KintoConnect = () => {
 
     const kycViewer = KYCViewerService.getInstance();
     const info = await kycViewer.fetchKYCInfo(accountInfo.walletAddress as Address);
-    setKYCViewerInfo(info);
+    if(typeof info !== 'string') {
+      setKYCViewerInfo(info);
+    } else {
+      setKYCViewerInfo(null);
+    }
   }
 
   async function fetchAccountInfo() {
@@ -135,7 +141,11 @@ const KintoConnect = () => {
 
     const kycViewer = KYCViewerService.getInstance();
     const info = await kycViewer.fetchKYCInfo(recipientAddress as Address);
-    setDestinationKYCInfo(info);
+    if (typeof info === 'string') {
+      setDestinationKYCError(info);
+    } else {
+      setDestinationKYCInfo(info);
+    }
   };
 
   useEffect(() => {
@@ -203,8 +213,11 @@ const KintoConnect = () => {
                     </DestinationSection>
                   </ColumnContent>
                   <KYCInfoWrapper>
-                    {destinationKYCInfo && (
+                    {destinationKYCInfo && !destinationKYCError && (
                       <KYCInfoDisplay kycInfo={destinationKYCInfo} title="Destination KYC Information" />
+                    )}
+                    {destinationKYCError && (
+                      <Alert severity="error">{destinationKYCError}</Alert>
                     )}
                   </KYCInfoWrapper>
                 </Column>

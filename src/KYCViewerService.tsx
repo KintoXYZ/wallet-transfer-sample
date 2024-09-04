@@ -14,6 +14,7 @@ export interface KYCViewerInfo {
 export class KYCViewerService {
   private static instance: KYCViewerService;
   private contract: any;
+  private factoryContract: any;
 
   private constructor() {
     const client = createPublicClient({
@@ -24,6 +25,12 @@ export class KYCViewerService {
     this.contract = getContract({
       address: contractsJSON.contracts.KYCViewer.address as Address,
       abi: contractsJSON.contracts.KYCViewer.abi,
+      client: { public: client }
+    });
+
+    this.factoryContract = getContract({
+      address: contractsJSON.contracts.KintoWalletFactory.address as Address,
+      abi: contractsJSON.contracts.KintoWalletFactory.abi,
       client: { public: client }
     });
   }
@@ -39,8 +46,15 @@ export class KYCViewerService {
     return this.contract;
   }
 
-  public async fetchKYCInfo(address: Address): Promise<KYCViewerInfo | null> {
+  public async fetchKYCInfo(address: Address): Promise<KYCViewerInfo | string> {
     try {
+      const walletTimestamp = await this.factoryContract.read.getWalletTimestamp([address]);
+      console.log('walletTimestamp', walletTimestamp);
+
+      if (walletTimestamp === BigInt(0)) { //This is NOT a Kinto wallet
+        return 'This is NOT a Kinto wallet';
+      }
+
       const [isIndividual, isCorporate, isKYC, isSanctionsSafe, getCountry, getWalletOwners] = await Promise.all([
         this.contract.read.isIndividual([address]),
         this.contract.read.isCompany([address]),
@@ -60,7 +74,7 @@ export class KYCViewerService {
       };
     } catch (error) {
       console.error('Failed to fetch KYC viewer info:', error);
-      return null;
+      return 'Failed to fetch KYC viewer info: ' + error;
     }
   }
 }
